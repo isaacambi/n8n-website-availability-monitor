@@ -1,0 +1,181 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -400,
+        32
+      ],
+      "id": "b5d0022a-0a4d-4a07-91ca-cedbed309c51",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  { json: { url: \"https://thepresentdevopsengineer.cloud\" } },\n  { json: { url: \"https://github.com\" } },\n  { json: { url: \"https://google.com\" } }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        32
+      ],
+      "id": "ea9c567a-e1ef-44d8-a3a9-5e4a68899677",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        32,
+        32
+      ],
+      "id": "555a1bd1-529d-4d65-a69d-34889f37a788",
+      "name": "HTTP Request",
+      "retryOnFail": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ce49a19a-02cb-4f8a-a1f5-4e8b1f456b57",
+              "leftValue": "={{ $json.statusCode }}",
+              "rightValue": "200",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        32
+      ],
+      "id": "77db0eec-88de-4ee9-b314-5fa112956698",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "devops",
+          "mode": "name"
+        },
+        "text": "=🚨 Site Down Alert! URL: {{ $json.url }} Status Code: {{ $json.statusCode }} Time: {{ $now }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        416,
+        -64
+      ],
+      "id": "5176052f-fcaf-4dd5-9807-8680cbbc906c",
+      "name": "Send a message",
+      "webhookId": "e32a8b28-fab8-43ab-afbb-6255f49a8103",
+      "credentials": {
+        "slackApi": {
+          "id": "W620QHZEl000TRSO",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0b9c93d2-fcb1-434a-9530-b6d8364f870d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b4b2281aedebb7c1cef9c7ede08963debc404a640fb181c84c211d43705aa381"
+  },
+  "id": "xt2hNFyHktJY1CBI",
+  "tags": []
+}
